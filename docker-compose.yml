@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - lab-network
+
+  device-service:
+    build: ./services/device-service
+    ports:
+      - "5001:5001"
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - lab-network
+
+  sample-service:
+    build: ./services/sample-service
+    ports:
+      - "5002:5002"
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - lab-network
+
+  workflow-service:
+    build: ./services/workflow-service
+    ports:
+      - "5003:5003"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - SAMPLE_API_URL=http://sample-service:5002
+    depends_on:
+      - redis
+      - device-service
+      - sample-service
+    networks:
+      - lab-network
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_WORKFLOW_API=http://localhost:5003
+      - REACT_APP_DEVICE_API=http://localhost:5001
+      - REACT_APP_SAMPLE_API=http://localhost:5002
+    depends_on:
+      - workflow-service
+      - device-service
+      - sample-service
+    networks:
+      - lab-network
+
+networks:
+  lab-network:
+    driver: bridge
