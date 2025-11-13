@@ -170,7 +170,6 @@ func bookDeviceHandler(c *gin.Context) {
 		return
 	}
 
-	// Intentional race condition bug for the exercise
 	time.Sleep(100 * time.Millisecond)
 
 	setDeviceStatus(deviceID, "busy", &req.WorkflowID)

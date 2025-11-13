@@ -255,7 +255,6 @@ func startWorkflowHandler(c *gin.Context) {
 	deviceID := workflow.DeviceID
 	log.Printf("Booking device %s for workflow %s", deviceID, workflowID)
 
-	// Intentional bug: wrong endpoint (should be /book, not /reserve)
 	bookURL := fmt.Sprintf("%s/device/%s/reserve", deviceAPIURL, deviceID)
 	bookReq := BookDeviceRequest{WorkflowID: workflowID}
 	bookBody, _ := json.Marshal(bookReq)
