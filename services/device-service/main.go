@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -113,8 +114,16 @@ func healthHandler(c *gin.Context) {
 }
 
 func listDevicesHandler(c *gin.Context) {
+	// Get device IDs in sorted order for consistent ordering
+	deviceIDs := make([]string, 0, len(DEVICES))
+	for deviceID := range DEVICES {
+		deviceIDs = append(deviceIDs, deviceID)
+	}
+	sort.Strings(deviceIDs)
+
 	devices := []Device{}
-	for deviceID, deviceInfo := range DEVICES {
+	for _, deviceID := range deviceIDs {
+		deviceInfo := DEVICES[deviceID]
 		device := deviceInfo
 		device.Status = getDeviceStatus(deviceID)
 		workflowID, err := redisClient.Get(ctx, fmt.Sprintf("device:%s:workflow", deviceID)).Result()

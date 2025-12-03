@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -132,11 +133,16 @@ func listSamplesHandler(c *gin.Context) {
 		return
 	}
 
-	// Convert map to array
+	// Convert map to array with consistent ordering
 	sampleList := make([]Sample, 0, len(samples))
 	for _, sample := range samples {
 		sampleList = append(sampleList, sample)
 	}
+
+	// Sort by barcode for consistent ordering
+	sort.Slice(sampleList, func(i, j int) bool {
+		return sampleList[i].Barcode < sampleList[j].Barcode
+	})
 
 	c.JSON(http.StatusOK, sampleList)
 }
